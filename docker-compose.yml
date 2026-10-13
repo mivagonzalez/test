@@ -1,0 +1,19 @@
+services:
+  deephaven:
+    build: .
+    ports:
+      - "${DEEPHAVEN_PORT:-10000}:10000"
+    volumes:
+      - ./server:/data          # ./server/app.d -> /data/app.d
+    environment:
+      # JVM: heap, app mode, auth and latency (update graph cycle + push interval to clients)
+      - START_OPTS=-Xmx8g -Ddeephaven.application.dir=/data/app.d -Dauthentication.psk=${DH_PSK:-change-me} -DPeriodicUpdateGraph.targetCycleDurationMillis=100 -Dbarrage.minUpdateInterval=100
+      # POC
+      - FEED_MODE=${FEED_MODE:-mock}            # mock | amps
+      - EDIT_MODE=${EDIT_MODE:-overrides}       # overrides | delta
+      - AMPS_URI=${AMPS_URI:-tcp://amps-host:9007/amps/json}
+      - AMPS_TOPIC=${AMPS_TOPIC:-market_data}
+      - OVERRIDES_TOPIC=${OVERRIDES_TOPIC:-market_data_overrides}
+      - AMPS_FILTER=${AMPS_FILTER:-}
+      - MOCK_ROWS=${MOCK_ROWS:-200000}
+      - MOCK_UPDATES_PER_SEC=${MOCK_UPDATES_PER_SEC:-20000}
